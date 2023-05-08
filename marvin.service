@@ -1,0 +1,16 @@
+[Unit]
+Description=Telegram Bot Service
+After=network.target
+
+[Service]
+Type=simple
+User=<user>
+Group=<group>
+Restart=always
+RestartSec=10
+ExecStart=python /usr/local/bin/marvin/main.py
+Environment="MARVIN_TOKEN=<MARVIN_TOKEN>"
+Environment="OPENAI_API_KEY=<OPENAI_API_KEY>"
+
+[Install]
+WantedBy=multi-user.target
