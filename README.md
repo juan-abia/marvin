@@ -1,6 +1,8 @@
 # Marvin
 Personal assistant telegram bot. It's based on the fictional character [Marvin](https://hitchhikers.fandom.com/wiki/Marvin) from [The Hitchhiker's Guide to the Galaxy](https://en.wikipedia.org/wiki/The_Hitchhiker%27s_Guide_to_the_Galaxy).
 
+![plot](docs/marvin_screenshot.png)
+
 ## Note
 Even though he is super intelligent, Marvin doesn't have memory (for now), so it won't remember previous messages. My plan is to add a context window that resets every 24 hours.
 
@@ -35,7 +37,7 @@ To run the bot continuously, repeat the first 3 steps previously defined, then:
     python install.py
     ```
     This script creates a service that is executed all the time. It's made for fedora (37), I think it could run without problems in other distros, but I'm not very familiar, so your might have to debug a bit. Unfortunately, the service doesn't use a virtual environment for now, so if want to use the service, you'll have to install the dependencies globally.
-    
+
 6. To check if the service is running: 
     ```
     sudo systemctl status marvin.service
