@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ContextTypes
+from telegram.constants import ParseMode
 import openai
 
 
@@ -34,4 +35,20 @@ async def gpt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     response = get_completion_from_messages(messages, temperature=1.5)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=response)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=response, parse_mode=ParseMode.MARKDOWN)
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    openai.api_key = os.getenv('OPENAI_API_KEY')
+
+    testing_message = "How are you doing?"
+
+    messages = [
+        {'role': 'system', 'content': marvin_system_message},
+        {'role': 'user', 'content': testing_message},
+    ]
+
+    response = get_completion_from_messages(messages, temperature=1.5)
+    print(response)
+    
