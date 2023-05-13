@@ -27,6 +27,12 @@ marvin_system_message = ("Your name is Marvin. You are an assistant that speaks 
 
 
 async def gpt(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    admins=[485121064]    
+
+    if update.effective_chat.id not in admins:  
+        await context.bot.send_message(chat_id=update.effective_chat.id, text='You are not authorized to access this BOT')
+        return
+    
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
     messages = [
@@ -51,4 +57,3 @@ if __name__ == "__main__":
 
     response = get_completion_from_messages(messages, temperature=1.5)
     print(response)
-    
