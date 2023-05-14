@@ -1,6 +1,7 @@
 import os
 import pickle
 import json
+
 from datetime import datetime
 from dotenv import load_dotenv
 from telegram import Update
@@ -84,8 +85,8 @@ def get_marvin_chain(telegram_id):
 
     return marvin_chain
 
-async def langchain(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    admins = json.loads(os.environ['ADMINS'])    
+async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    admins = json.loads(os.environ['ADMINS'])  
 
     if str(update.effective_chat.id) not in admins:
         print(f"Unauthorized ID: {update.effective_chat.id}")

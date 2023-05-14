@@ -1,11 +1,11 @@
 import logging
 import os
-import json
+
 from dotenv import load_dotenv
-from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes, CommandHandler
+from telegram.ext import filters, MessageHandler, ApplicationBuilder, CommandHandler
 
 from extra_handlers import start
-from langchain_handlers import langchain, reset_chat
+from langchain_handlers import chat, reset_chat
 
 
 class Marvin():
@@ -16,11 +16,11 @@ class Marvin():
 
     def add_handlers(self) -> None:
         start_handler = CommandHandler('start', start)
-        langchain_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), langchain)
+        chat_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), chat)
         reset_chat_handler = CommandHandler('reset_chat', reset_chat)
 
         self.application.add_handler(start_handler)
-        self.application.add_handler(langchain_handler)
+        self.application.add_handler(chat_handler)
         self.application.add_handler(reset_chat_handler)
 
     def run(self) -> None:
