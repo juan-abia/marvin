@@ -1,13 +1,35 @@
 # Marvin
 Personal assistant telegram bot. It's based on the fictional character [Marvin](https://hitchhikers.fandom.com/wiki/Marvin) from [The Hitchhiker's Guide to the Galaxy](https://en.wikipedia.org/wiki/The_Hitchhiker%27s_Guide_to_the_Galaxy).
 
-![plot](docs/marvin_screenshot.png)
-
-## Note
-Even though he is super intelligent, Marvin doesn't have memory (for now), so it won't remember previous messages. My plan is to add a context window that resets every 24 hours.
+![marvin chat example](docs/marvin_screenshot.png)
 
 ## How to use
-To start the bot follow the next steps:
+There are two ways to use the bot. The first one and recommended is running the bot using docker, the second one is intended to try the bot by running from source.
+
+for both ways there is a common step. Create a .env file in your working directory and add the following variables:
+
+ - Your [telegram bot token](https://core.telegram.org/bots/features#botfather)
+ - Add your [openai api key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key) 
+ - A list of telegram user ids for users that can interact with the bot. To get your telegram id, just talk with the bot @userinfobot
+
+Once all the env variables are added, your .env file should look like this:
+
+    MARVIN_TOKEN=<YOUR_BOT_TOKEN>
+    OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+    ADMINS=["<TELEGRAM_USER_ID_1>", "<TELEGRAM_USER_ID_2>"]
+
+### Using docker
+1. Make sure you have docker installed and the daemon is active:
+    ```
+    sudo systemctl is-active docker
+    ```
+2. Run the bot:
+    ```
+    docker run --rm --env-file .env -it juanabia99/marvin:latest
+    ```
+
+### Run manually
+To manually run the bot follow the next steps:
 1. Clone this repo and `cd` to it:
     ```
     git clone https://github.com/juan-abia/marvin.git
@@ -27,20 +49,6 @@ To start the bot follow the next steps:
 4. Run `main.py` and enjoy using your personal assistant!
     ```
     python main.py
-    ```
-
-### Run continuously (WIP)
-To run the bot continuously, repeat the first 3 steps previously defined, then:
-
-5. Run `install.py`. It will ask for you password so it can install the necessary files. 
-    ```
-    python install.py
-    ```
-    This script creates a service that is executed all the time. It's made for fedora (37), I think it could run without problems in other distros, but I'm not very familiar, so your might have to debug a bit. Unfortunately, the service doesn't use a virtual environment for now, so if want to use the service, you'll have to install the dependencies globally.
-
-6. To check if the service is running: 
-    ```
-    sudo systemctl status marvin.service
     ```
 
 ## Contribution guide
