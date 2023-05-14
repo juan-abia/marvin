@@ -1,15 +1,16 @@
 import os
 import pickle
-import openai
+import json
 from datetime import datetime
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
-from langchain import OpenAI, LLMChain, PromptTemplate
+from langchain import OpenAI
+from langchain import LLMChain, PromptTemplate
 from langchain.memory import ConversationTokenBufferMemory, ChatMessageHistory
 
-def save_memory_to_file(chain):
+def save_memory_to_file(chain, telegram_id):
     messages = chain.memory.buffer
     now = datetime.utcnow()
     date = now.strftime("%d-%m-%Y")
@@ -17,7 +18,7 @@ def save_memory_to_file(chain):
     if not os.path.exists("data/"):
         os.makedirs("data")
 
-    with open(f"data/memory-{date}", "wb") as f:
+    with open(f"data/memory-{telegram_id}-{date}", "wb") as f:
         pickle.dump(messages, f)
 
 def load_memory_from_file(chain, file_path):
@@ -25,25 +26,33 @@ def load_memory_from_file(chain, file_path):
         messages = pickle.load(f)
     chain.memory.chat_memory = ChatMessageHistory(messages=messages)
 
-def load_todays_memory(chain):
+def load_todays_memory(chain, telegram_id):
     now = datetime.utcnow()
     date = now.strftime("%d-%m-%Y")
-    file_path = f"data/memory-{date}"
+    file_path = f"data/memory-{telegram_id}-{date}"
     if os.path.exists(file_path):
         load_memory_from_file(chain, file_path)
+
+def remove_user_memory(telegram_id):
+    now = datetime.utcnow()
+    date = now.strftime("%d-%m-%Y")
+    file_path = f"data/memory-{telegram_id}-{date}"
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return True
+    else:
+        return False
 
 def remove_old_memory():
     now = datetime.utcnow()
     date = now.strftime("%d-%m-%Y")
 
     for filename in os.listdir("data/"):
-        print(filename)
-        print(filename != f"memory-{date}")
-        if filename != f"memory-{date}":
+        if filename[-10:] != f"{date}":
             filename_relPath = os.path.join("data",filename)
             os.remove(filename_relPath)
 
-def get_marvin_chain():
+def get_marvin_chain(telegram_id):
     load_dotenv()
 
     template = ("Your name is Marvin. You are an assistant that speaks like Marvin from the hithicker guide to the Galaxy."
@@ -64,27 +73,36 @@ def get_marvin_chain():
     )
 
     marvin_chain = LLMChain(
-        llm=OpenAI(temperature=0), 
+        llm=OpenAI(temperature=1), 
         prompt=prompt,
         verbose=True,
         memory=ConversationTokenBufferMemory(llm=OpenAI(), max_token_limit=1000),
     )
 
     remove_old_memory()
-    load_todays_memory(marvin_chain)
+    load_todays_memory(marvin_chain, telegram_id)
 
     return marvin_chain
 
 async def langchain(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    admins=[485121064]    
+    admins = json.loads(os.environ['ADMINS'])    
 
-    if update.effective_chat.id not in admins:
+    if str(update.effective_chat.id) not in admins:
         print(f"Unauthorized ID: {update.effective_chat.id}")
         await context.bot.send_message(chat_id=update.effective_chat.id, text='You are not authorized to access Marvin :(')
         return
 
-    marvin_chain = get_marvin_chain()
+    marvin_chain = get_marvin_chain(update.effective_chat.id)
 
     response = marvin_chain.predict(human_input=update.message.text)
-    save_memory_to_file(marvin_chain)
+    save_memory_to_file(marvin_chain, update.effective_chat.id)
     await context.bot.send_message(chat_id=update.effective_chat.id, text=response, parse_mode=ParseMode.MARKDOWN)
+
+async def reset_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    removed = remove_user_memory(update.effective_chat.id)
+    
+    if removed:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Your chat history has been reseted!")
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="You chat history was already empty :/")
+
